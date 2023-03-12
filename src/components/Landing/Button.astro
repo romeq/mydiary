@@ -1,0 +1,23 @@
+---
+export interface Props {
+    title: string
+    link: string
+}
+
+const { title, link } = Astro.props
+---
+
+<a class="button" href={link}>{title}</a>
+
+<style>
+    .button {
+        color: black;
+        max-width: 200px;
+        border: 0;
+        background-color: hsl(var(--accent-secondary), 71%, 74%);
+        text-decoration: none;
+        padding: 15px 20px;
+
+        border: 1px solid black;
+    }
+</style>

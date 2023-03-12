@@ -1,0 +1,94 @@
+---
+import Button from "./Button.astro"
+import Development from "./Development.astro"
+---
+
+<Development />
+<header>
+    <div class="github">
+        <a href="https://github.com/romeq/mydiary" target="_blank">
+            <img src="/assets/github-mark.svg" alt="github" height={32} width={32} />
+        </a>
+    </div>
+</header>
+<main>
+    <div class="content">
+        <h1>Your digital diary, designed to be as private as your personal data deserves to be.</h1>
+        <h3 class="subtext">
+            This service's purpose is to be that website you can trust your life to. The documents are saved
+            where you save them. <strong>You</strong> are the one that is in control of your data, as it should
+            be in terms of privacy.
+        </h3>
+
+        <div class="buttons">
+            <Button title="Open my workspace" link="/#workspace" />
+        </div>
+    </div>
+</main>
+
+<style>
+    body {
+        margin: 0;
+        background-color: hsl(var(--accent), 60%, 82%);
+    }
+
+    header {
+        max-width: 120ch;
+        padding: 20px;
+        margin: 0 auto;
+        width: 100%;
+
+        display: flex;
+        justify-content: right;
+    }
+
+    main {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        height: 100vh;
+        margin: auto;
+        padding: 0 1.5rem;
+        max-width: 90ch;
+
+        isolation: isolate;
+    }
+    main::before {
+        content: "";
+        margin-left: -40px;
+        position: absolute;
+        background-color: hsl(var(--accent), 60%, 70%);
+        padding: 140px 70px;
+        z-index: -1;
+    }
+
+    .content {
+        animation: 300ms ease dropin;
+    }
+
+    @keyframes dropin {
+        0% {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0px);
+            opacity: 1;
+        }
+    }
+
+    h1 {
+        font-weight: 500;
+        margin: 0;
+    }
+
+    h3 {
+        font-weight: 400;
+        margin: 30px 0 0 0;
+    }
+
+    .buttons {
+        margin-top: 40px;
+    }
+</style>
