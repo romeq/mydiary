@@ -1,0 +1,56 @@
+---
+import Layout from "../layouts/Layout.astro"
+---
+
+<Layout title="">
+    <main>
+        <div class="content">
+            <h1>404 [Not found]</h1>
+            <h3>
+                Some common reasons include: the site is under development, you don't have enough permissions
+                or it has been deleted.
+            </h3>
+            <a href="/">Back to the homepage</a>
+        </div>
+    </main>
+</Layout>
+
+<style>
+    body {
+        background-color: hsl(var(--accent), 60%, 82%);
+        height: 100vh;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    main {
+        display: flex;
+        flex-direction: column;
+        max-width: 60ch;
+        margin: 0 auto;
+        padding: 0 20px;
+        height: 100%;
+        justify-content: center;
+    }
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        animation: 200ms ease dropin;
+    }
+
+    h1 {
+        color: hsl(var(--accent), 60%, 22%);
+        font-weight: 800;
+    }
+
+    h3 {
+        color: hsl(var(--accent), 60%, 22%);
+    }
+
+    a {
+        margin-top: 20px;
+    }
+</style>
