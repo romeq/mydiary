@@ -11,13 +11,17 @@ const { title, link } = Astro.props
 
 <style>
     .button {
+        transition: 200ms ease;
         color: black;
         max-width: 200px;
         border: 0;
         background-color: hsl(var(--accent-secondary), 71%, 74%);
         text-decoration: none;
         padding: 15px 20px;
-
         border: 1px solid black;
+    }
+    .button:hover {
+        background-color: hsl(var(--accent-secondary), 51%, 64%);
+        box-shadow: 5px 5px 0px black;
     }
 </style>

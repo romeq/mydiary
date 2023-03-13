@@ -21,7 +21,7 @@ import Development from "./Development.astro"
         </h3>
 
         <div class="buttons">
-            <Button title="Open my workspace" link="/#workspace" />
+            <Button title="Open my workspace" link="/workspace" />
         </div>
     </div>
 </main>
@@ -56,26 +56,16 @@ import Development from "./Development.astro"
     }
     main::before {
         content: "";
-        margin-left: -40px;
+        margin-left: -80px;
+        margin-bottom: 140px;
         position: absolute;
         background-color: hsl(var(--accent), 60%, 70%);
-        padding: 140px 70px;
+        padding: 100px;
         z-index: -1;
     }
 
     .content {
         animation: 300ms ease dropin;
-    }
-
-    @keyframes dropin {
-        0% {
-            transform: translateY(20px);
-            opacity: 0;
-        }
-        100% {
-            transform: translateY(0px);
-            opacity: 1;
-        }
     }
 
     h1 {
