@@ -50,6 +50,7 @@ menu ul li a {
 }
 
 button {
+    color: black;
     padding: 0px 9px;
     border-radius: 10px;
     transition: 300ms ease;
@@ -59,6 +60,9 @@ button {
 }
 button:enabled:hover {
     background-color: hsl(var(--accent), 12%, 80%);
+}
+button:disabled {
+    color: hsl(0, 0%, 70%);
 }
 button:active {
     outline: 0px solid transparent;
@@ -115,13 +119,27 @@ textarea:focus {
 
 @media screen  and (max-width: 700px) {
     .menu-main-container {
-        flex-direction: column;
+        flex-direction: column-reverse;
+        padding: 20px 0;
     }
 
     menu {
         width: 100%;
     }
+    menu h1, menu p {
+        display: none;
+    }
+    menu .flex-buttons {
+        margin-top: 0px;
+    }
     .write-main {
         margin: 10px 0;
+    }
+    .write-main header h1 {
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
+    .write-main img { 
+        width: 100px;
     }
 }
