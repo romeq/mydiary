@@ -1,5 +1,6 @@
 ```ts
 const api = new Workspace()
+// => api.export()
 
 const stories = [
     {
@@ -19,7 +20,7 @@ api.find("My")
 // => [
 // =>     {
 // =>         date: "20.1.2023 15:00",
-// =>         description: "My dream came true: I got the job I wanted!",
+// =>         description: "My dream came true. I got the job I wanted!",
 // =>         identifier: "bfae9d5f-5fad-4ce2-9d77-2e2398a7cb14",
 // =>     },
 // =>     {
@@ -30,8 +31,6 @@ api.find("My")
 // => ]
 
 api.getDay("bfae9d5f-5fad-4ce2-9d77-2e2398a7cb14")
-// => new Stream()
-
-
+// => new ReadableStream()
 
 ```

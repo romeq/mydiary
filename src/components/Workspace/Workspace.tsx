@@ -1,29 +1,31 @@
 import localforage from "localforage"
 import { useEffect, useState } from "react"
+import { Workspace } from "../../lib/workspace"
 import Import from "./Import"
 import WorkspaceView from "./WorkspaceView"
 
 export const diaryIndexName = "diaryIndex"
 
-export default function Workspace() {
-    const [imported, setImported] = useState(false)
+export default function () {
+    const [workspace, setWorkspace] = useState<Workspace>()
 
     useEffect(() => {
         async function fetchData() {
             const f = await localforage.getItem(diaryIndexName)
-            setImported(f != null)
+            if (f != null) setWorkspace(new Workspace(localforage))
         }
         fetchData()
     }, [])
 
-    return imported ? (
+    return workspace != undefined ? (
         <WorkspaceView
+            workspaceApi={workspace}
             logoutMethod={async () => {
                 await localforage.removeItem(diaryIndexName)
-                setImported(false)
+                setWorkspace(undefined)
             }}
         />
     ) : (
-        <Import onfinish={() => setImported(true)} />
+        <Import onfinish={() => setWorkspace(new Workspace(localforage))} />
     )
 }

@@ -3,6 +3,8 @@
 // - [] Workspace can be exported as JSON
 // - [] Workspace can be imported from JSON
 
+import { diaryIndexName } from "../components/Workspace/Workspace"
+
 // Implementation:
 // - Master: has information of the childs (address)
 //      - child: has information of the child, including the story etc
@@ -17,22 +19,39 @@ export interface DayRecord {
 
 class Workspace {
     days: DayRecord[]
+    name: string
     storage: LocalForage
 
     constructor(stg: LocalForage) {
         this.days = []
+        this.name = "user"
         this.storage = stg
     }
 
     async add(day: DayRecord) {
-        await this.storage.setItem(`file[${day.identifier}]`, JSON.stringify(day))
+        if (this.days.filter((e) => e.identifier === day.identifier).length > 0) {
+            return
+        }
+
         this.days.push(day)
+        this.syncToStorage()
     }
 
-    async exportMaster() {}
+    async update(id: string, story: string) {
+        await this.storage.setItem(`file[${id}]`, story)
+    }
 
     async getDay(id: string) {
-        this.storage.getItem(`file[${id}]`)
+        return await this.storage.getItem<string>(`file[${id}]`)
+    }
+
+    private async syncToStorage() {
+        const instance = {
+            clientPreferredName: this.name,
+            days: this.days,
+        }
+        await this.storage.setItem(diaryIndexName, JSON.stringify(instance))
+        console.log(JSON.parse((await this.storage.getItem(diaryIndexName)) || "{}"))
     }
 }
 
