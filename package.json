@@ -10,6 +10,14 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^2.0.18"
+    "@astrojs/react": "^2.1.0",
+    "@types/localforage": "^0.0.34",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "astro": "^2.0.18",
+    "framer-motion": "^10.3.4",
+    "localforage": "^1.10.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }

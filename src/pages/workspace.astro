@@ -1,0 +1,52 @@
+---
+import Layout from "../layouts/Layout.astro"
+import Workspace from "../components/Workspace/Workspace"
+import Development from "../components/Landing/Development.astro"
+---
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <title>mydiary - My Workspace</title>
+    </head>
+    <body>
+        <Layout title="My Workspace">
+            <Development />
+            <main>
+                <Workspace client:only />
+            </main>
+        </Layout>
+    </body>
+</html>
+
+<style>
+    body {
+        margin: 0;
+        background-color: hsl(var(--accent), 60%, 82%);
+    }
+
+    header {
+        max-width: 120ch;
+        padding: 20px;
+        margin: 0 auto;
+        width: 100%;
+
+        display: flex;
+        justify-content: right;
+    }
+
+    main {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        height: 100vh;
+        margin: auto;
+        padding: 0 1.5rem;
+        max-width: 120ch;
+
+        isolation: isolate;
+    }
+</style>
