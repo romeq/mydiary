@@ -1,0 +1,85 @@
+.box {
+    margin-top: 20px;
+    max-width: 700px;
+    margin: 20px auto;
+    background-color: hsl(var(--accent), 33%, 96%);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+h2 {
+    font-weight: 900;
+}
+
+p {
+    padding-top: 10px;
+}
+
+.buttons {
+    padding: 20px 0 0 0;
+    display: flex;
+    gap: 10px;
+}
+.buttons button, input{
+    border-radius: 10px;
+    transition: 300ms ease;
+    background-color: hsl(var(--accent), 12%, 90%);
+    padding: 3px 10px;
+    border: 0;
+}
+.buttons .input-inline {
+    margin-bottom: 10px;
+    align-items: center;
+    display: flex;
+}
+
+.buttons .input-inline svg {
+    padding: 0;
+    margin: 0;
+    transform: translate(0, 25%);
+}
+.buttons .error {
+    padding: 0px 5px;
+    color: hsl(0, 34%, 48%);
+}
+
+.buttons .submit-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.buttons button.eye {
+    padding: 3px 5px;
+    margin-left: 5px;
+    transition: 100ms ease;
+    background-color: transparent;
+} 
+.buttons input {
+    width: 100%;
+    color: hsl(var(--accent), 12%, 10%);
+    background-color: hsl(var(--accent), 12%, 90%);
+}
+.buttons .button:enabled:hover {
+    cursor: pointer;
+    background-color: hsl(var(--accent), 12%, 80%);
+}
+
+.container {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+}
+
+@media screen and (max-width: 600px) {
+    .box {
+        max-width: 100%;
+    }
+    .buttons {
+        flex-direction: column;
+    }
+
+    .container {
+        flex-direction: column-reverse;
+    }
+}

@@ -25,6 +25,7 @@ menu p, .write-main header h3 {
 
 menu .flex-buttons {
     margin-top: 30px;
+    min-width: 200px;
     display: flex;
     gap: 5px;
 }
@@ -72,18 +73,23 @@ button:active {
     background: hsl(var(--accent), 0%, 100%);
     overflow-y: auto;
     padding: 0 20px;
-    width: 100%;
     margin: 0 20px;
     border-radius: 10px;
     height: fit-content;
+    min-height: 300px;
+}
+.write-main .flex {
+    display: flex;
+    justify-content: space-between;
 }
 .write-main img {
     margin: 20px 20px 0px 20px;
-    width: 200px;
-    float: right;
+    padding: 20px 20px 0 20px;
+    width: auto;
+    max-width: 200px;
 }
 .write-main header {
-    float: left;
+    width: auto;
     margin: 20px 0;
 }
 .write-main header h1 {
@@ -141,5 +147,7 @@ textarea:focus {
     }
     .write-main img { 
         width: 100px;
+        opacity: 0.4;
+        float: right;
     }
 }

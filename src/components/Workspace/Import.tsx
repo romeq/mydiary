@@ -1,11 +1,12 @@
 import { useState } from "react"
 import "./Import.css"
+import "./Dialog.css"
 import MultiDialog from "./MultiDialog"
 import { motion } from "framer-motion"
 import ImportFromFileProvider from "./ImportFromFileProvider"
 import localforage from "localforage"
 
-export default function Import({ onfinish }: { onfinish: () => void }) {
+export default function Import({ onCreateNew: onfinish }: { onCreateNew: () => void }) {
     const [index, setIndex] = useState(0)
     const [shown, setShown] = useState(true)
 

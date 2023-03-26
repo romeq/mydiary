@@ -14,18 +14,13 @@ export default function () {
             const f = await localforage.getItem(diaryIndexName)
             if (f != null) setWorkspace(new Workspace(localforage))
         }
+
         fetchData()
     }, [])
 
     return workspace != undefined ? (
-        <WorkspaceView
-            workspaceApi={workspace}
-            logoutMethod={async () => {
-                await localforage.removeItem(diaryIndexName)
-                setWorkspace(undefined)
-            }}
-        />
+        <WorkspaceView workspaceApi={workspace} />
     ) : (
-        <Import onfinish={() => setWorkspace(new Workspace(localforage))} />
+        <Import onCreateNew={() => setWorkspace(new Workspace(localforage))} />
     )
 }
