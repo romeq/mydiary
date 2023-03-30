@@ -33,8 +33,10 @@ p {
 }
 
 .buttons {
+
     padding: 20px 0 0 0;
     display: flex;
+    flex-direction: column;
     gap: 10px;
 }
 .buttons button, input{
@@ -45,6 +47,7 @@ p {
     border: 0;
 }
 .buttons .input-inline {
+    width: 100%;
     margin-bottom: 10px;
     align-items: center;
     display: flex;
@@ -79,6 +82,12 @@ p {
 .buttons .button:enabled:hover {
     cursor: pointer;
     background-color: hsl(var(--accent), 12%, 80%);
+}
+.buttons button .spinning {
+    font-size: 0.8rem;
+    margin-top: 0.3px;
+    margin-left: 5px;
+
 }
 
 .container {

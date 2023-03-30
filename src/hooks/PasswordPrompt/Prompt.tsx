@@ -1,18 +1,28 @@
 import "./Prompt.css"
-import { AnimatePresence, motion } from "framer-motion"
+import { motion } from "framer-motion"
 import { createRef, FormEvent, useState } from "react"
-import { FaEye, FaEyeSlash } from "react-icons/fa"
+import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa"
 
 export interface Props {
     title: string
     desc: string
     open: boolean
+    inProgress: boolean
     imgsrc: string
+    buttonText: string
     setOpen: ((value: boolean) => void) | undefined
     okcallback: (v: string) => Promise<Error | undefined>
 }
 
-export default function PasswordPromptComponent({ open, title, imgsrc, desc, setOpen, okcallback }: Props) {
+export default function PasswordPromptComponent({
+    open,
+    title,
+    imgsrc,
+    inProgress,
+    desc,
+    buttonText,
+    okcallback,
+}: Props) {
     const passwordInput = createRef<HTMLInputElement>()
     const [passwordShown, setPasswordShown] = useState(false)
     const [errorInCallback, setErrorInFinish] = useState<Error>()
@@ -26,7 +36,14 @@ export default function PasswordPromptComponent({ open, title, imgsrc, desc, set
         setErrorInFinish(undefined)
 
         if (!passwordInput.current?.value) return
-        const result = await okcallback(passwordInput.current?.value)
+
+        let result: Error | undefined
+        try {
+            result = await okcallback(passwordInput.current?.value)
+        } catch (e: any) {
+            setErrorInFinish(e)
+            return
+        }
 
         setTimeout(() => {
             if (result instanceof Error) setErrorInFinish(result)
@@ -57,7 +74,7 @@ export default function PasswordPromptComponent({ open, title, imgsrc, desc, set
                         <p>{desc}</p>
                     </div>
 
-                    <img className="import-svg-1" src={imgsrc} alt="moi"></img>
+                    <img className="import-svg-1" src={imgsrc} alt=""></img>
                 </div>
 
                 <div className="buttons">
@@ -75,7 +92,9 @@ export default function PasswordPromptComponent({ open, title, imgsrc, desc, set
                         </div>
 
                         <div className="submit-area">
-                            <button type="submit">Open</button>
+                            <button type="submit">
+                                {buttonText} {inProgress && <FaSpinner className="spinning" />}
+                            </button>
                             <motion.p
                                 animate={{
                                     scaleY: errorInCallback ? 1 : 0,

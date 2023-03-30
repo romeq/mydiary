@@ -90,6 +90,18 @@ const { title } = Astro.props
         font: inherit;
     }
 
+    .spinning {
+        animation: 0.5s infinite rotate;
+    }
+    @keyframes rotate {
+        0% {
+            transform: rotate(1deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
     /* Prefers-Reduced-Motion */
 
     @media (prefers-reduced-motion: reduce) {

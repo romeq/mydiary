@@ -37,12 +37,15 @@ menu ul {
     margin-top: 20px;
 }
 menu ul li {
+    transition: 300ms ease;
     margin: 10px 0;
     width: 100%;
     padding: 5px 20px 5px 10px;
     background-color: hsl(var(--accent), 100%, 90%);
+    border-radius: 8px;
+    cursor: pointer;
 }
-menu ul li.active {
+menu ul li.active, menu ul li:hover {
     background-color: hsl(var(--accent), 60%, 80%);
 }
 

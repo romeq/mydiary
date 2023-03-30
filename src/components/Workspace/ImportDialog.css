@@ -6,6 +6,7 @@
     height: 100vh;
     min-height: 500px;
     width: 100%;
+    visibility: visible !important;
 }
 
 .box {
@@ -24,6 +25,7 @@ p {
 .buttons {
     padding: 20px 0 0 0;
     display: flex;
+    flex-direction: row !important;
     gap: 10px;
 }
 .buttons button, input{
@@ -73,13 +75,14 @@ p {
 .container {
     margin-bottom: 10px;
     display: flex;
+    flex-direction: column-reverse;
     gap: 30px;
     justify-content: center;
 }
 
 .import-svg-1 {
-    padding: 20px;
-    width: 200px;
+    padding: 10px;
+    width: 100px;
 }
 
 @media screen and (max-width: 600px) {

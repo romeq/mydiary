@@ -35,6 +35,7 @@ export default function Import({ onCreateNew: onfinish }: { onCreateNew: () => v
             initial={{
                 opacity: 0,
             }}
+            className="box-container"
         >
             <MultiDialog
                 index={index}
