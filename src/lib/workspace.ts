@@ -55,6 +55,8 @@ class Workspace {
     }
 
     async encryptDiary(password: string) {
+        password = await bcrypt.hash(password, 10)
+
         await this.syncMomToStorage()
         await this.storage.setItem("hash", password)
         this.days.map(this.encryptDay)

@@ -1,6 +1,5 @@
 import { useState } from "react"
-import "./Import.css"
-import "./Dialog.css"
+import "./ImportDialog.css"
 import MultiDialog from "./MultiDialog"
 import { motion } from "framer-motion"
 import ImportFromFileProvider from "./ImportFromFileProvider"

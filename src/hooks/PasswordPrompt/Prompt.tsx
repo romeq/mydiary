@@ -1,65 +1,73 @@
-import { createRef, useState } from "react"
-import { motion } from "framer-motion"
-import "./Dialog.css"
+import "./Prompt.css"
+import { AnimatePresence, motion } from "framer-motion"
+import { createRef, FormEvent, useState } from "react"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
-export default function DecryptDialog({
-    finishFunction,
-}: {
-    finishFunction: (some: string | undefined) => Promise<Error | undefined>
-}) {
-    const f = createRef<HTMLInputElement>()
+
+export interface Props {
+    title: string
+    desc: string
+    open: boolean
+    imgsrc: string
+    setOpen: ((value: boolean) => void) | undefined
+    okcallback: (v: string) => Promise<Error | undefined>
+}
+
+export default function PasswordPromptComponent({ open, title, imgsrc, desc, setOpen, okcallback }: Props) {
+    const passwordInput = createRef<HTMLInputElement>()
     const [passwordShown, setPasswordShown] = useState(false)
-    const [errorInFinish, setErrorInFinish] = useState(false)
+    const [errorInCallback, setErrorInFinish] = useState<Error>()
     const [formIsBusy, setFormIsBusy] = useState(false)
+
+    async function close(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault()
+        if (formIsBusy) return
+
+        setFormIsBusy(true)
+        setErrorInFinish(undefined)
+
+        if (!passwordInput.current?.value) return
+        const result = await okcallback(passwordInput.current?.value)
+
+        setTimeout(() => {
+            if (result instanceof Error) setErrorInFinish(result)
+            setFormIsBusy(false)
+        }, 200)
+    }
 
     return (
         <motion.div
+            className="box-container"
             transition={{
                 duration: 0.3,
             }}
             animate={{
-                translateY: "0px",
-                opacity: 1,
+                translateY: open ? "0px" : "-10px",
+                opacity: open ? 1 : 0,
+                visibility: open ? "visible" : "hidden",
             }}
             initial={{
-                translateY: "10px",
-                opacity: 0.01,
+                translateY: "-10px",
+                opacity: 0.0,
             }}
         >
             <div className="box">
                 <div className="container">
                     <div className="text-section">
-                        <h2>Decryption</h2>
-                        <p>
-                            It appears your workspace has been locked. In order to open it, you need the
-                            encryption password.
-                        </p>
+                        <h2>{title}</h2>
+                        <p>{desc}</p>
                     </div>
 
-                    <img className="import-svg-1" src="/assets/vault.svg" alt="moi"></img>
+                    <img className="import-svg-1" src={imgsrc} alt="moi"></img>
                 </div>
 
                 <div className="buttons">
-                    <form
-                        onSubmit={async (e) => {
-                            e.preventDefault()
-                            if (formIsBusy) return
-
-                            setFormIsBusy(true)
-                            setErrorInFinish(false)
-                            const z = await finishFunction(f.current?.value || undefined)
-                            setTimeout(() => {
-                                setErrorInFinish(z instanceof Error)
-                                setFormIsBusy(false)
-                            }, 200)
-                        }}
-                    >
+                    <form onSubmit={close}>
                         <div className="input-inline">
                             <input
                                 autoFocus={true}
                                 placeholder="Password"
                                 type={passwordShown ? "text" : "password"}
-                                ref={f}
+                                ref={passwordInput}
                             />
                             <button type="button" className="eye" onClick={() => setPasswordShown((p) => !p)}>
                                 {passwordShown ? <FaEyeSlash /> : <FaEye />}
@@ -70,14 +78,14 @@ export default function DecryptDialog({
                             <button type="submit">Open</button>
                             <motion.p
                                 animate={{
-                                    scaleY: errorInFinish ? 1 : 0,
+                                    scaleY: errorInCallback ? 1 : 0,
                                 }}
                                 initial={{
                                     scaleY: 0,
                                 }}
                                 className="error"
                             >
-                                Password comparison failed
+                                {errorInCallback?.message}
                             </motion.p>
                         </div>
                     </form>

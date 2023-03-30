@@ -1,10 +1,27 @@
+.box-container {
+    visibility: hidden;
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    height: 100vh;
+    min-height: 500px;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
 .box {
-    margin-top: 20px;
+    border: 0;
     max-width: 700px;
-    margin: 20px auto;
-    background-color: hsl(var(--accent), 33%, 96%);
     padding: 20px;
     border-radius: 10px;
+}
+
+@media screen and (max-width: 600px) {
+    
+    .box {
+        width: 100%;
+    }
 }
 
 h2 {
@@ -68,7 +85,7 @@ p {
     margin-bottom: 10px;
     display: flex;
     gap: 30px;
-    justify-content: center;
+    justify-content: space-between;
 }
 
 @media screen and (max-width: 600px) {
