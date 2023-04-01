@@ -4,6 +4,8 @@ import { ChangeEvent, useEffect, useState } from "react"
 import type { Workspace } from "../../lib/workspace"
 import PasswordPromptComponent from "../../hooks/PasswordPrompt/Prompt"
 import Writer from "./Writer"
+import Notice from "./Notice"
+import { Buffer } from "buffer"
 
 export interface Props {
     workspaceApi: Workspace
@@ -11,22 +13,22 @@ export interface Props {
 
 export default function WorkspaceView({ workspaceApi }: Props) {
     const [promptLoading, setPromptLoading] = useState<boolean>(false)
-    const [visible, setVisible] = useState(true)
+    const [recentlyEncrypted, setRecentlyEncrypted] = useState<boolean>(false)
 
     async function save(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
         const id = workspaceApi.newID(new Date(Date.now()))
         await workspaceApi.add({
-            date: new Date(Date.now()),
+            date: Date.now(),
             description: e.target.value.slice(0, 20),
             identifier: id,
         })
-        await workspaceApi.update(id, e.target.value)
+        await workspaceApi.update(id, Buffer.from(e.target.value))
     }
 
     const [isencrypted, setIsencrypted] = useState(false)
     useEffect(() => {
         async function fetch() {
-            const encryptedStatus = await workspaceApi.isEncrypted()
+            const encryptedStatus = await workspaceApi.hasHash()
             setIsencrypted(encryptedStatus)
         }
 
@@ -37,11 +39,14 @@ export default function WorkspaceView({ workspaceApi }: Props) {
 
     async function lockout(password: string) {
         setPromptLoading(true)
-        await workspaceApi.encryptDiary(password)
+        const r = await workspaceApi.encryptDiary(password)
+        if (r instanceof Error) {
+            setPromptLoading(false)
+            return
+        }
         setPromptLoading(false)
         setShowPasswordForm(false)
-        setIsencrypted(true)
-        setVisible(true)
+        setRecentlyEncrypted(true)
     }
 
     return (
@@ -51,7 +56,7 @@ export default function WorkspaceView({ workspaceApi }: Props) {
                     open={isencrypted}
                     inProgress={promptLoading}
                     buttonText="Load workspace"
-                    imgsrc="/assets/blooming.svg"
+                    imgsrc="/assets/login.svg"
                     setOpen={undefined}
                     title="Open vault"
                     desc="It appears your workspace has been locked. In order to open it, you need the encryption password."
@@ -82,13 +87,15 @@ export default function WorkspaceView({ workspaceApi }: Props) {
                     open={showPasswordForm}
                     inProgress={promptLoading}
                 />
-            ) : (
-                <Writer
-                    save={save}
-                    visible={visible}
-                    setShowPasswordForm={setShowPasswordForm}
-                    workspaceApi={workspaceApi}
+            ) : recentlyEncrypted ? (
+                <Notice
+                    title="Success"
+                    img="/assets/secure_files.svg"
+                    text="The vault was encrypted with given password. Next time you reload this page you'll be asked for the decryption password. By the way, anyone cannot rescue the data if the password is lost so make sure you remember it!"
+                    visible
                 />
+            ) : (
+                <Writer save={save} setShowPasswordForm={setShowPasswordForm} workspaceApi={workspaceApi} />
             )}
         </AnimatePresence>
     )

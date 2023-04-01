@@ -5,6 +5,8 @@
 
 import bcrypt from "bcryptjs"
 import { diaryIndexName } from "../components/Workspace/Workspace"
+import { Buffer } from "buffer"
+import { decrypt, encrypt } from "./crypto"
 
 // Implementation:
 // - Master: has information of the childs (address)
@@ -12,8 +14,12 @@ import { diaryIndexName } from "../components/Workspace/Workspace"
 // - Class is exported providing a simple API for processing diary-specific data
 //
 
+export interface Mom {
+    days: DayRecord[]
+}
+
 export interface DayRecord {
-    date: Date
+    date: number
     description: string
     identifier: string
 }
@@ -31,122 +37,134 @@ class Workspace {
 
     newID(day: Date): string {
         try {
-            return Buffer.from(day.toDateString()).toString("base64")
+            return Buffer.from(`${day.getDay()}-${day.getMonth()}-${day.getFullYear()}`).toString("base64")
         } catch (e) {
-            return btoa(day.toDateString())
+            return btoa(`${day.getDay()}-${day.getMonth()}-${day.getFullYear()}`)
         }
-    }
-    getID(id: string) {
-        console.log(Buffer.from(id, "base64").toString())
     }
 
     async add(day: DayRecord) {
         if (this.days.filter((e) => e.identifier === day.identifier).length === 0) {
             this.days.push(day)
-            await this.syncMomStorage()
+            await this.updateFilesCache()
         }
     }
 
-    async update(id: string, story: string | ArrayBuffer) {
-        await this.storage.setItem(`file[${id}]`, story)
+    async update(id: string, story: Buffer) {
+        await this.storage.setItem<Buffer>(`file[${id}]`, story)
     }
 
-    async getDay(id: string) {
-        return await this.storage.getItem<string>(`file[${id}]`)
+    async day(id: string) {
+        return await this.storage.getItem<Buffer>(`file[${id}]`)
     }
 
-    async getMom() {
+    async all() {
+        await this.updateFilesCache()
+        return this.days
+    }
+
+    async mom(): Promise<Mom | undefined> {
         const mom = await this.storage.getItem<string>(diaryIndexName)
         if (mom) return JSON.parse(mom)
-        return undefined
     }
 
-    async isEncrypted() {
+    async hasHash() {
         return (await this.storage.getItem("hash")) != undefined
     }
 
-    async encryptDiary(password: string) {
-        const hashpassword = await bcrypt.hash(password, 15)
+    async encryptDiary(password: string): Promise<Error | undefined> {
+        if (await this.hasHash()) return Error("Already encrypted")
 
-        await this.syncMomStorage()
-        await this.storage.setItem("hash", hashpassword)
+        await this.updateFilesCache()
+        await this.storage.setItem("hash", await bcrypt.hash(password, 10))
 
-        this.days.map((day) => {
-            console.log("encrypting", day)
-            this.encryptDay(day, password)
-        })
-    }
-
-    async decryptDiary(password: string): Promise<Error | undefined> {
-        await this.syncMomStorage()
-        this.days.map((day) => this.decryptDay(day, password))
-
-        const hash = await this.storage.getItem<string>("hash")
-        if (hash) {
-            const compareResult = await bcrypt.compare(password, hash)
-            if (compareResult) await this.storage.removeItem("hash")
-            else return Error("Hash comparison failed")
+        const keys = await this.getStorageIDs()
+        try {
+            const proms = keys.map(async (day) => await this.encryptDay(day, password))
+            await Promise.all(proms)
+        } catch (e) {
+            console.error(e)
+            await this.storage.removeItem("hash")
+            return Error("Encryption failed")
         }
 
         return undefined
     }
 
-    private async encryptDay(day: DayRecord, password: string) {
-        console.log(day)
-        const content = await this.getDay(day.identifier)
-        if (content == undefined) return
+    async decryptDiary(password: string): Promise<Error | undefined> {
+        if (!(await this.hasHash())) return Error("Not encrypted")
 
-        const encrypted = await window?.crypto?.subtle?.encrypt(
-            {
-                name: "AES-CBC",
-                iv: Buffer.alloc(32),
-            },
-            await this.getCryptoKey(password),
-            Buffer.from(content)
-        )
-
-        console.log(encrypted)
-        this.update(day.identifier, encrypted.slice(0, undefined))
-    }
-
-    private async decryptDay(day: DayRecord, password: string) {
-        const content = await this.getDay(day.identifier)
-        if (content == undefined) return
-
-        const decrypted = await window?.crypto?.subtle?.decrypt(
-            {
-                name: "AES-CBC",
-                iv: Buffer.alloc(32),
-            },
-            await this.getCryptoKey(password),
-            Buffer.from(content)
-        )
-        this.update(day.identifier, decrypted.slice(0, undefined))
-    }
-
-    private async getCryptoKey(password: string): Promise<CryptoKey> {
-        return await window.crypto.subtle.importKey(
-            "raw",
-            new TextEncoder().encode(password),
-            "PBKDF2",
-            false,
-            ["deriveBits", "deriveKey"]
-        )
-    }
-
-    private async syncMomStorage() {
-        let days = this.days
-        const diaryIndex = await this.storage.getItem<string>(diaryIndexName)
-        if (diaryIndex) {
-            const daysParsed: DayRecord[] | undefined = JSON.parse(diaryIndex)["days"]
-            if (daysParsed) days = this.days.concat(daysParsed.filter((f) => !daysParsed.includes(f)))
+        await this.updateFilesCache()
+        const hash = await this.storage.getItem<string>("hash")
+        if (hash) {
+            const compareResult = await bcrypt.compare(password, hash)
+            if (!compareResult) return Error("Hash comparison failed")
         }
 
-        const instance = {
-            clientPreferredName: this.name,
-            days: days,
+        const days = await this.getStorageIDs()
+        try {
+            const proms = days.map(async (day) => await this.decryptDay(day, password))
+            await Promise.all(proms)
+        } catch (e) {
+            return Error("Failed to decrypt files")
         }
-        await this.storage.setItem(diaryIndexName, JSON.stringify(instance))
+
+        if (hash) await this.storage.removeItem("hash")
+
+        return undefined
+    }
+
+    private async encryptDay(day: string, password: string) {
+        const content = await this.day(day)
+        if (content == undefined) return
+
+        const encrypted = await encrypt(content, password)
+        if (encrypted instanceof Error) throw encrypted
+        if (encrypted) await this.update(day, encrypted)
+    }
+
+    private async decryptDay(day: string, password: string) {
+        const content = await this.day(day)
+        if (!content) throw Error("Day not found")
+
+        const decrypted = await decrypt(content, password)
+        if (decrypted instanceof Error) throw Error("Decryption failed")
+        await this.update(day, decrypted)
+    }
+
+    private async getStorageIDs(): Promise<string[]> {
+        const storageKeys = (await this.storage.keys()).filter((v) => /file\[\w{1,30}={0,2}\]/.test(v))
+        let keys: string[] = []
+
+        const proms = storageKeys.map(async (stgkey) => {
+            const id = stgkey.replace(new RegExp(`file|\\[|]`, "g"), "")
+            if (id) keys.push(id)
+        })
+        await Promise.all(proms)
+
+        return keys
+    }
+
+    private async getStorageFiles(): Promise<DayRecord[] | undefined> {
+        const momFromStorage = await this.storage.getItem<string>(diaryIndexName)
+        if (!momFromStorage) return undefined
+        const parsed: Mom = JSON.parse(momFromStorage)
+        return parsed.days
+    }
+
+    private async updateFilesCache() {
+        const keys = await this.getStorageFiles()
+        if (!keys) return
+
+        keys.map((day) => {
+            if (this.days.filter((v) => v.identifier === day.identifier).length > 0) return
+            this.days.push(day)
+        })
+
+        const mom: Mom = {
+            days: this.days,
+        }
+        this.storage.setItem(diaryIndexName, JSON.stringify(mom))
     }
 }
 

@@ -18,10 +18,15 @@
 }
 
 @media screen and (max-width: 600px) {
-    
     .box {
         width: 100%;
     }
+}
+
+.image {
+    width: 50%;
+    max-width: 150px;
+    margin-bottom: 30px;
 }
 
 h2 {
@@ -33,11 +38,22 @@ p {
 }
 
 .buttons {
-
     padding: 20px 0 0 0;
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.buttons form {
+    width: 100%;
+    max-width: 400px;
+}
+
+@media screen  and (max-width: 400px) {
+    .buttons .submit-area {
+        flex-direction: column;
+    }
+    
 }
 .buttons button, input{
     border-radius: 10px;

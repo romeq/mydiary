@@ -1,6 +1,6 @@
 import "./Prompt.css"
 import { motion } from "framer-motion"
-import { createRef, FormEvent, useState } from "react"
+import { createRef, FormEvent, useEffect, useState } from "react"
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa"
 
 export interface Props {
@@ -31,11 +31,10 @@ export default function PasswordPromptComponent({
     async function close(e: FormEvent<HTMLFormElement>) {
         e.preventDefault()
         if (formIsBusy) return
+        if (!passwordInput.current?.value) return
 
         setFormIsBusy(true)
         setErrorInFinish(undefined)
-
-        if (!passwordInput.current?.value) return
 
         let result: Error | undefined
         try {
@@ -74,7 +73,7 @@ export default function PasswordPromptComponent({
                         <p>{desc}</p>
                     </div>
 
-                    <img className="import-svg-1" src={imgsrc} alt=""></img>
+                    <img className="image" src={imgsrc} alt=""></img>
                 </div>
 
                 <div className="buttons">

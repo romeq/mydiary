@@ -1,15 +1,13 @@
-import { motion } from "framer-motion"
 import { ChangeEvent, createRef, useEffect } from "react"
+import { motion } from "framer-motion"
 import type { Workspace } from "../../lib/workspace"
 import Menu from "./Menu"
 
 export default function ({
-    visible,
     setShowPasswordForm,
     save,
     workspaceApi,
 }: {
-    visible: boolean
     setShowPasswordForm: (v: boolean) => void
     workspaceApi: Workspace
     save(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): Promise<void>
@@ -20,8 +18,8 @@ export default function ({
         if (!textareaRef.current) return
 
         const currentDateId = workspaceApi.newID(new Date(Date.now()))
-        const f = await workspaceApi.getDay(currentDateId)
-        if (f && textareaRef.current) textareaRef.current.innerText = f
+        const f = await workspaceApi.day(currentDateId)
+        if (f && textareaRef.current) textareaRef.current.innerHTML = new TextDecoder().decode(f)
     }
 
     useEffect(() => {
@@ -34,7 +32,7 @@ export default function ({
                 opacity: 0,
             }}
             animate={{
-                opacity: visible ? 1 : 0,
+                opacity: 1,
             }}
             className="menu-main-container"
         >

@@ -1,0 +1,29 @@
+.main-container {
+    max-width: 500px;
+    margin: 20px auto;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-container .notice {
+    background-color: hsl(0, 0%, 100%);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.main-container img {
+    width: 20%;
+    min-width: 100px;
+    margin-bottom: 50px;
+}
+.main-container h1 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+.main-container h3 {
+    font-size: 1.05rem;
+    color: rgb(73, 73, 73);
+}
