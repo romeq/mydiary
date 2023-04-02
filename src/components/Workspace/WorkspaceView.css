@@ -22,12 +22,25 @@ menu h1 {
 menu p, .write-main header h3 {
     color:hsl(0, 0%, 22%);
 }
+menu h3 {
+    font-size: 0.95rem;
+    font-weight: 400;
+}
 
 menu .flex-buttons {
-    margin-top: 30px;
     min-width: 200px;
     display: flex;
+    flex-direction: column;
     gap: 5px;
+}
+menu hr {
+    background-color: hsl(var(--accent), 12%, 80%);
+    height: 1px;
+    border: 0;
+    width: 100%;
+}
+menu div {
+    padding-top: 20px;
 }
 
 menu ul {
@@ -54,6 +67,7 @@ menu ul li a {
 }
 
 button {
+    max-width: fit-content;
     color: black;
     padding: 0px 9px;
     border-radius: 10px;
@@ -86,10 +100,10 @@ button:active {
     justify-content: space-between;
 }
 .write-main img {
+    align-self: flex-end;
     margin: 20px 20px 0px 20px;
-    padding: 20px 20px 0 20px;
     width: auto;
-    max-width: 200px;
+    max-width: 20%;
 }
 .write-main header {
     width: auto;
@@ -128,19 +142,14 @@ textarea:focus {
 
 @media screen  and (max-width: 700px) {
     .menu-main-container {
-        flex-direction: column-reverse;
+        flex-direction: column;
         padding: 20px 0;
     }
 
     menu {
         width: 100%;
     }
-    menu h1, menu p {
-        display: none;
-    }
-    menu .flex-buttons {
-        margin-top: 0px;
-    }
+
     .write-main {
         margin: 10px 0;
     }

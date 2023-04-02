@@ -51,7 +51,7 @@ export default function ({
                         autoFocus={true}
                         ref={textareaRef}
                         onChange={save}
-                        placeholder="Write here!"
+                        placeholder="You haven't written anything yet."
                     ></textarea>
                 </div>
             </div>
