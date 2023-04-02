@@ -7,13 +7,11 @@ export default function ({ logoutMethod }: { logoutMethod: () => any }) {
 
                 <div className="flex-buttons">
                     <h3>Control</h3>
-                    <hr></hr>
                     <button onClick={logoutMethod}>Lock this workspace</button>
                 </div>
 
                 <div className="menu-links">
                     <h3>Links</h3>
-                    <hr></hr>
                     <ul>
                         <li className="active">
                             <a href="/workspace">Write about this day</a>
