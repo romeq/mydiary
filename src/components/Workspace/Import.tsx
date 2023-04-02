@@ -1,6 +1,6 @@
 import { useState } from "react"
 import "./ImportDialog.css"
-import MultiDialog from "./MultiDialog"
+import MultiDialog from "./ComponentList"
 import { motion } from "framer-motion"
 import ImportFromFileProvider from "./ImportFromFileProvider"
 import localforage from "localforage"

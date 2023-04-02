@@ -1,4 +1,4 @@
-export default function ({ logoutMethod }: { logoutMethod: () => any }) {
+export default function ({ logoutMethod, setView }: { logoutMethod: () => any; setView(n: number): any }) {
     return (
         <>
             <menu>
@@ -13,18 +13,14 @@ export default function ({ logoutMethod }: { logoutMethod: () => any }) {
                 <div className="menu-links">
                     <h3>Links</h3>
                     <ul>
-                        <li className="active">
-                            <a href="/workspace">Write about this day</a>
+                        <li tabIndex={1} className="active" onClick={() => setView(0)}>
+                            Write about this day
                         </li>
-                        <li>
-                            <a aria-disabled={true} href="/workspace/writings">
-                                Previous writings
-                            </a>
+                        <li tabIndex={2} onClick={() => setView(1)}>
+                            Previous writings
                         </li>
-                        <li>
-                            <a aria-disabled={true} href="/workspace/history">
-                                Mood history
-                            </a>
+                        <li tabIndex={3} onClick={() => setView(2)}>
+                            Mood history
                         </li>
                     </ul>
                 </div>
