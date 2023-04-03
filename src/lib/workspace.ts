@@ -36,7 +36,6 @@ class Workspace {
     }
 
     newID(day: Date): string {
-        day = new Date(1, 4, 2023)
         try {
             return Buffer.from(this.getDateFormat(day)).toString("base64url")
         } catch (e) {
