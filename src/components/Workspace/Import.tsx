@@ -5,16 +5,19 @@ import { motion } from "framer-motion"
 import ImportFromFileProvider from "./ImportFromFileProvider"
 import localforage from "localforage"
 import type { Mom } from "../../lib/workspace"
+import { diaryIndexName } from "./Workspace"
 
 export default function Import({ onCreateNew: onfinish }: { onCreateNew: () => void }) {
     const [index, setIndex] = useState(0)
     const [shown, setShown] = useState(true)
 
     async function createNewWorkspace() {
-        const mom: Mom = {
-            days: [],
+        if ((await localforage.getItem(diaryIndexName)) == undefined) {
+            const mom: Mom = {
+                days: [],
+            }
+            localforage.setItem(diaryIndexName, JSON.stringify(mom))
         }
-        localforage.setItem("diaryIndex", JSON.stringify(mom))
         setShown(false)
         setTimeout(() => onfinish(), 200)
     }
