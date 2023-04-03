@@ -4,13 +4,17 @@ import MultiDialog from "./ComponentList"
 import { motion } from "framer-motion"
 import ImportFromFileProvider from "./ImportFromFileProvider"
 import localforage from "localforage"
+import type { Mom } from "../../lib/workspace"
 
 export default function Import({ onCreateNew: onfinish }: { onCreateNew: () => void }) {
     const [index, setIndex] = useState(0)
     const [shown, setShown] = useState(true)
 
     async function createNewWorkspace() {
-        localforage.setItem("diaryIndex", JSON.stringify({}))
+        const mom: Mom = {
+            days: [],
+        }
+        localforage.setItem("diaryIndex", JSON.stringify(mom))
         setShown(false)
         setTimeout(() => onfinish(), 200)
     }

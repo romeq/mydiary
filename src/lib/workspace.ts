@@ -36,14 +36,19 @@ class Workspace {
     }
 
     newID(day: Date): string {
+        day = new Date(1, 4, 2023)
         try {
-            return Buffer.from(`${day.getDay()}-${day.getMonth()}-${day.getFullYear()}`).toString("base64")
+            return Buffer.from(this.getDateFormat(day)).toString("base64url")
         } catch (e) {
-            return btoa(`${day.getDay()}-${day.getMonth()}-${day.getFullYear()}`)
+            return btoa(this.getDateFormat(day))
         }
+    }
+    getDateFormat(day: Date) {
+        return `${day.getUTCDate()}.${day.getUTCMonth() + 1}.${day.getFullYear()}`
     }
 
     async add(day: DayRecord) {
+        await this.updateFilesCache()
         if (this.days.filter((e) => e.identifier === day.identifier).length === 0) {
             this.days.push(day)
             await this.updateFilesCache()
@@ -72,7 +77,7 @@ class Workspace {
         return (await this.storage.getItem("hash")) != undefined
     }
 
-    async encryptDiary(password: string): Promise<Error | undefined> {
+    async encrypt(password: string): Promise<Error | undefined> {
         if (await this.hasHash()) return Error("Already encrypted")
 
         await this.updateFilesCache()
@@ -91,7 +96,7 @@ class Workspace {
         return undefined
     }
 
-    async decryptDiary(password: string): Promise<Error | undefined> {
+    async decrypt(password: string): Promise<Error | undefined> {
         if (!(await this.hasHash())) return Error("Not encrypted")
 
         await this.updateFilesCache()
@@ -148,6 +153,7 @@ class Workspace {
     private async getStorageFiles(): Promise<DayRecord[] | undefined> {
         const momFromStorage = await this.storage.getItem<string>(diaryIndexName)
         if (!momFromStorage) return undefined
+
         const parsed: Mom = JSON.parse(momFromStorage)
         return parsed.days
     }

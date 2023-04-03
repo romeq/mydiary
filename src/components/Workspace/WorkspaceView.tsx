@@ -19,7 +19,7 @@ export default function WorkspaceView({ workspaceApi }: Props) {
         const id = workspaceApi.newID(new Date(Date.now()))
         await workspaceApi.add({
             date: Date.now(),
-            description: e.target.value.slice(0, 20),
+            description: e.target.value.slice(undefined, 20),
             identifier: id,
         })
         await workspaceApi.update(id, Buffer.from(e.target.value))
@@ -39,7 +39,7 @@ export default function WorkspaceView({ workspaceApi }: Props) {
 
     async function lockout(password: string) {
         setPromptLoading(true)
-        const r = await workspaceApi.encryptDiary(password)
+        const r = await workspaceApi.encrypt(password)
         if (r instanceof Error) {
             setPromptLoading(false)
             return
@@ -64,7 +64,7 @@ export default function WorkspaceView({ workspaceApi }: Props) {
                         if (!password) return
 
                         setPromptLoading(true)
-                        const success = await workspaceApi.decryptDiary(password)
+                        const success = await workspaceApi.decrypt(password)
                         if (!(success instanceof Error)) {
                             setIsencrypted(false)
                         }

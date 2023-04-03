@@ -15,7 +15,6 @@
     "@types/bcryptjs": "^2.4.2",
     "@types/localforage": "^0.0.34",
     "@types/pkcs7-padding": "^0.1.1",
-    "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "astro": "^2.0.18",
     "bcryptjs": "^2.4.3",
@@ -31,6 +30,7 @@
     "react-icons": "^4.8.0"
   },
   "devDependencies": {
-    "@types/pbkdf2": "^3.1.0"
+    "@types/pbkdf2": "^3.1.0",
+    "@types/react": "^18.0.32"
   }
 }

@@ -53,7 +53,7 @@ menu ul li {
     width: 100%;
     padding: 5px 20px 5px 10px;
     background-color: hsl(var(--accent), 100%, 90%);
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
 }
 menu ul li.active, menu ul li:hover {
@@ -90,12 +90,19 @@ button:active {
     padding: 0 20px;
     margin: 0 20px;
     border-radius: 10px;
-    height: fit-content;
     width: 100%;
 }
 .write-main .flex {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+}
+.write-main .error {
+    padding: 20px;
+    text-align: center;
+    color: hsl(0, 100%, 30%);
+    background-color: hsl(0, 50%, 90%);
+    border-radius: 10px;
 }
 .write-main img {
     align-self: flex-end;
@@ -113,6 +120,28 @@ button:active {
 }
 .write-main .bottom {
     margin-bottom: 20px;
+}
+
+.write-main .items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.write-main .item {
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: hsl(var(--accent), 0%, 93%);
+    width: 100%;
+}
+.write-main .item span.date {
+    color: hsl(var(--accent), 0%, 13%);
+    font-weight: 500;
+}
+.write-main .item span.date::before {
+    content: "Date: ";
+    color: hsl(var(--accent), 0%, 63%);
+    font-weight: 400;
 }
 
 .write-main .bottom button {
