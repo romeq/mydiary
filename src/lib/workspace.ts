@@ -48,10 +48,9 @@ class Workspace {
     }
 
     async add(day: DayRecord) {
-        await this.updateFilesCache()
         if (this.days.filter((e) => e.identifier === day.identifier).length === 0) {
             this.days.push(day)
-            await this.updateFilesCache()
+            await this.updateDaysStorage()
         }
     }
 
@@ -64,7 +63,7 @@ class Workspace {
     }
 
     async all() {
-        await this.updateFilesCache()
+        await this.updateDaysStorage()
         return this.days
     }
 
@@ -80,7 +79,7 @@ class Workspace {
     async encrypt(password: string): Promise<Error | undefined> {
         if (await this.hasHash()) return Error("Already encrypted")
 
-        await this.updateFilesCache()
+        await this.updateDaysStorage()
         await this.storage.setItem("hash", await bcrypt.hash(password, 10))
 
         const keys = await this.getStorageIDs()
@@ -99,7 +98,7 @@ class Workspace {
     async decrypt(password: string): Promise<Error | undefined> {
         if (!(await this.hasHash())) return Error("Not encrypted")
 
-        await this.updateFilesCache()
+        await this.updateDaysStorage()
         const hash = await this.storage.getItem<string>("hash")
         if (hash) {
             const compareResult = await bcrypt.compare(password, hash)
@@ -158,7 +157,8 @@ class Workspace {
         return parsed.days
     }
 
-    private async updateFilesCache() {
+    // populate this.days with storage elements and rewrite storage
+    private async updateDaysStorage() {
         const keys = await this.getStorageFiles()
         if (!keys) return
 
