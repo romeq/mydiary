@@ -13,7 +13,7 @@ export default function ({
     async function importFromStorage(ID: string) {
         if (!textareaRef.current) return
 
-        const f = await workspaceApi.day(ID)
+        const f = await workspaceApi.getDayByID(ID)
         if (f && textareaRef.current) textareaRef.current.innerHTML = new TextDecoder().decode(f)
     }
 

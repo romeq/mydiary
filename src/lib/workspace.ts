@@ -25,58 +25,66 @@ export interface DayRecord {
 }
 
 class Workspace {
-    days: DayRecord[]
-    name: string
     storage: LocalForage
+    private mom: Mom | undefined
 
     constructor(stg: LocalForage) {
-        this.days = []
-        this.name = "user"
         this.storage = stg
     }
 
+    /*
+        Identifier helper functions 
+    */
     newID(day: Date): string {
-        try {
-            return Buffer.from(this.getDateFormat(day)).toString("base64url")
-        } catch (e) {
-            return btoa(this.getDateFormat(day))
-        }
+        return Buffer.from(this.formatDate(day)).toString("base64")
     }
-    getDateFormat(day: Date) {
+
+    formatDate(day: Date) {
         return `${day.getUTCDate()}.${day.getUTCMonth() + 1}.${day.getFullYear()}`
     }
 
-    async add(day: DayRecord) {
-        if (this.days.filter((e) => e.identifier === day.identifier).length === 0) {
-            this.days.push(day)
+    /*
+        File-specific functions 
+    */
+    async addNewDay(day: DayRecord) {
+        if (this.mom?.days.filter((e) => e.identifier === day.identifier).length === 0) {
+            this.mom.days.push(day)
             await this.updateDaysStorage()
         }
     }
 
-    async update(id: string, story: Buffer) {
+    async updateDayByID(id: string, story: Buffer) {
         await this.storage.setItem<Buffer>(`file[${id}]`, story)
     }
 
-    async day(id: string) {
+    async getDayByID(id: string) {
         return await this.storage.getItem<Buffer>(`file[${id}]`)
     }
 
-    async all() {
-        await this.updateDaysStorage()
-        return this.days
+    async getAllDays() {
+        return this.mom?.days
     }
 
-    async mom(): Promise<Mom | undefined> {
-        const mom = await this.storage.getItem<string>(diaryIndexName)
-        if (mom) return JSON.parse(mom)
-    }
-
-    async hasHash() {
+    async workspaceHasEncryption() {
         return (await this.storage.getItem("hash")) != undefined
     }
 
-    async encrypt(password: string): Promise<Error | undefined> {
-        if (await this.hasHash()) return Error("Already encrypted")
+    async loadWorkspaceFromBrowser(): Promise<void> {
+        const mom = await this.storage.getItem<string>(diaryIndexName)
+        if (!mom) return
+
+        const parsedMom: Mom = JSON.parse(mom)
+        if (!parsedMom) return
+
+        this.mom = parsedMom
+    }
+
+    /*
+        encryptWorkspace encrypts all days from the browser storage and replaces their contents.
+        the key is derived using pbkdf2.
+    */
+    async encryptWorkspace(password: string): Promise<Error | undefined> {
+        if (await this.workspaceHasEncryption()) return Error("Already encrypted")
 
         await this.updateDaysStorage()
         await this.storage.setItem("hash", await bcrypt.hash(password, 10))
@@ -94,8 +102,13 @@ class Workspace {
         return undefined
     }
 
-    async decrypt(password: string): Promise<Error | undefined> {
-        if (!(await this.hasHash())) return Error("Not encrypted")
+    /* 
+        decryptWorkspace decrypts the workspace from browser storage.
+        the key is derived from password-parameter with pbkdf2 and first compared with
+        the bcrypt-hash saved among the files in browser.
+    */
+    async decryptWorkspace(password: string): Promise<Error | undefined> {
+        if (!(await this.workspaceHasEncryption())) return Error("Not encrypted")
 
         await this.updateDaysStorage()
         const hash = await this.storage.getItem<string>("hash")
@@ -117,28 +130,41 @@ class Workspace {
         return undefined
     }
 
+    /* 
+        Private functions
+        - Cryptography:
+            - encryptDay
+            - decryptDay
+        - Storage:
+            - getStorageIDs
+            - updateDaysStorage
+    */
+
+    // enecrpyt a single day
     private async encryptDay(day: string, password: string) {
-        const content = await this.day(day)
+        const content = await this.getDayByID(day)
         if (content == undefined) return
 
         const encrypted = await encrypt(content, password)
         if (encrypted instanceof Error) throw encrypted
-        if (encrypted) await this.update(day, encrypted)
+        if (encrypted) await this.updateDayByID(day, encrypted)
     }
 
+    // decrpyt a single day
     private async decryptDay(day: string, password: string) {
-        const content = await this.day(day)
+        const content = await this.getDayByID(day)
         if (!content) throw Error("Day not found")
 
         const decrypted = await decrypt(content, password)
         if (decrypted instanceof Error) throw Error("Decryption failed")
-        await this.update(day, decrypted)
+        await this.updateDayByID(day, decrypted)
     }
 
-    private async getStorageIDs(): Promise<string[]> {
-        const storageKeys = (await this.storage.keys()).filter((v) => /file\[\w{1,30}={0,2}\]/.test(v))
+    // getStorageIDs gets all days from the browser storage
+    private async getStorageIDs(idRegex: RegExp = /file\[\w{1,30}={0,2}\]/): Promise<string[]> {
         let keys: string[] = []
 
+        const storageKeys = (await this.storage.keys()).filter((v) => idRegex.test(v))
         const proms = storageKeys.map(async (stgkey) => {
             const id = stgkey.replace(new RegExp(`file|\\[|]`, "g"), "")
             if (id) keys.push(id)
@@ -148,29 +174,16 @@ class Workspace {
         return keys
     }
 
-    private async getStorageFiles(): Promise<DayRecord[] | undefined> {
-        const momFromStorage = await this.storage.getItem<string>(diaryIndexName)
-        if (!momFromStorage) return undefined
-
-        const parsed: Mom = JSON.parse(momFromStorage)
-        return parsed.days
-    }
-
     // populate this.days with storage elements and rewrite storage
     private async updateDaysStorage() {
-        const keys = await this.getStorageFiles()
-        if (!keys) return
-
-        keys.map((day) => {
-            if (this.days.filter((v) => v.identifier === day.identifier).length > 0) return
-            this.days.push(day)
-        })
-
-        const mom: Mom = {
-            days: this.days,
-        }
-        this.storage.setItem(diaryIndexName, JSON.stringify(mom))
+        this.storage.setItem(diaryIndexName, JSON.stringify(this.mom))
     }
+}
+
+export async function createWorkspace(storage: LocalForage): Promise<Workspace> {
+    const workspace = new Workspace(storage)
+    await workspace.loadWorkspaceFromBrowser()
+    return workspace
 }
 
 export { Workspace }

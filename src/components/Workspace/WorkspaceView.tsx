@@ -17,18 +17,18 @@ export default function WorkspaceView({ workspaceApi }: Props) {
 
     async function save(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
         const id = workspaceApi.newID(new Date(Date.now()))
-        await workspaceApi.add({
+        await workspaceApi.addNewDay({
             date: Date.now(),
             description: e.target.value.slice(undefined, 20),
             identifier: id,
         })
-        await workspaceApi.update(id, Buffer.from(e.target.value))
+        await workspaceApi.updateDayByID(id, Buffer.from(e.target.value))
     }
 
     const [isencrypted, setIsencrypted] = useState(false)
     useEffect(() => {
         async function fetch() {
-            const encryptedStatus = await workspaceApi.hasHash()
+            const encryptedStatus = await workspaceApi.workspaceHasEncryption()
             setIsencrypted(encryptedStatus)
         }
 
@@ -39,7 +39,7 @@ export default function WorkspaceView({ workspaceApi }: Props) {
 
     async function lockout(password: string) {
         setPromptLoading(true)
-        const r = await workspaceApi.encrypt(password)
+        const r = await workspaceApi.encryptWorkspace(password)
         if (r instanceof Error) {
             setPromptLoading(false)
             return
@@ -64,7 +64,7 @@ export default function WorkspaceView({ workspaceApi }: Props) {
                         if (!password) return
 
                         setPromptLoading(true)
-                        const success = await workspaceApi.decrypt(password)
+                        const success = await workspaceApi.decryptWorkspace(password)
                         if (!(success instanceof Error)) {
                             setIsencrypted(false)
                         }
