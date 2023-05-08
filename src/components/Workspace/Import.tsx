@@ -56,15 +56,12 @@ export default function Import({ onCreateNew: onfinish }: { onCreateNew: (s?: Wo
             }
 
             setShown(false)
+            await localforage.setItem(s3credsIndex, JSON.stringify(opts))
             setTimeout(() => onfinish(s3storageInstance), 200)
         } catch (e) {
             console.error(e)
             return false
         }
-
-        await localforage.setItem(s3credsIndex, JSON.stringify(opts))
-        setShown(false)
-        setTimeout(() => onfinish(), 200)
 
         return true
     }
@@ -114,7 +111,11 @@ export default function Import({ onCreateNew: onfinish }: { onCreateNew: (s?: Wo
                         </div>
                     </div>,
 
-                    <ImportFromFileProvider setS3Instance={newS3Instance} goback={() => adjustIndex(-1)} />,
+                    <ImportFromFileProvider
+                        loading={false}
+                        setS3Instance={newS3Instance}
+                        goback={() => adjustIndex(-1)}
+                    />,
                 ]}
             />
         </motion.div>

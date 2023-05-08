@@ -2,10 +2,12 @@ import { useState } from "react"
 import type { SetStorageInstanceOptions } from "./Import"
 
 export default function ({
+    loading,
     goback,
     setS3Instance,
 }: {
     goback: () => void
+    loading: boolean
     setS3Instance: (opts: SetStorageInstanceOptions) => Promise<boolean>
 }) {
     const [instanceAddress, setInstanceAddress] = useState<string>("")
@@ -77,8 +79,10 @@ export default function ({
                 </div>
 
                 <div className="buttons">
-                    <button type="submit">Setup S3 sync</button>
-                    <button type="button" onClick={goback}>
+                    <button type="submit" disabled={loading}>
+                        Setup S3 sync
+                    </button>
+                    <button type="button" disabled={loading} onClick={goback}>
                         Go back
                     </button>
                 </div>

@@ -1,4 +1,4 @@
-import { ChangeEvent, createRef, useEffect, useState } from "react"
+import { ChangeEvent, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import type { Workspace } from "../../lib/workspace"
 import Menu from "./Menu"
@@ -29,7 +29,12 @@ export default function ({
             }}
             className="menu-main-container"
         >
-            <Menu view={view} setView={setView} logoutMethod={() => setShowPasswordForm(true)} />
+            <Menu
+                workspace={workspaceApi}
+                view={view}
+                setView={setView}
+                logoutMethod={() => setShowPasswordForm(true)}
+            />
             <AnimatePresence>
                 <ComponentList
                     index={view}

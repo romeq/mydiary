@@ -26,6 +26,49 @@ menu h3 {
     font-weight: 400;
 }
 
+menu div {
+    padding-top: 20px;
+}
+menu .sync-button {
+    position: relative;
+    padding-top: 0px;
+}
+menu .sync-options {
+    z-index: 102;
+    background: hsl(var(--accent), 10%, 100%);
+    border: 1px solid hsl(var(--accent), 12%, 80%);
+    color: white;
+    width: 100%;
+    padding: 90px 10px;
+    border-radius: 10px;
+    position: absolute;
+    top: 100%;
+    padding-top: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+menu .s3-box {
+    height: 100%;
+    background: hsl(var(--accent), 30%, 80%, 80%);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 103;
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+menu .sync-options button {
+    margin: 10px 0;
+    width: 100%;
+    max-width: none;
+}
 menu .flex-buttons {
     min-width: 200px;
     display: flex;
@@ -37,9 +80,6 @@ menu hr {
     height: 1px;
     border: 0;
     width: 100%;
-}
-menu div {
-    padding-top: 20px;
 }
 
 menu ul {

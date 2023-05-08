@@ -72,7 +72,7 @@ class Workspace {
         }
     }
 
-    async loadWorkspaceFromBrowser(): Promise<void> {
+    async loadFromStorage(): Promise<void> {
         const mom = await this.storage.getItem(diaryIndexName)
         if (!mom) return
 
@@ -192,7 +192,7 @@ export interface WorkspaceStorage {
 
 export async function createWorkspace(storage: WorkspaceStorage): Promise<Workspace> {
     const workspace = new Workspace(storage)
-    await workspace.loadWorkspaceFromBrowser()
+    await workspace.loadFromStorage()
     return workspace
 }
 
