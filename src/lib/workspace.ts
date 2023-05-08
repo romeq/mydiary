@@ -20,15 +20,14 @@ export interface Mom {
 
 export interface DayRecord {
     date: number
-    description: string
     identifier: string
 }
 
 class Workspace {
-    storage: LocalForage
+    storage: WorkspaceStorage
     private mom: Mom | undefined
 
-    constructor(stg: LocalForage) {
+    constructor(stg: WorkspaceStorage) {
         this.storage = stg
     }
 
@@ -54,11 +53,11 @@ class Workspace {
     }
 
     async updateDayByID(id: string, story: Buffer) {
-        await this.storage.setItem<Buffer>(`file[${id}]`, story)
+        await this.storage.setItem(`file[${id}]`, story)
     }
 
     async getDayByID(id: string) {
-        return await this.storage.getItem<Buffer>(`file[${id}]`)
+        return await this.storage.getItem(`file[${id}]`)
     }
 
     async getAllDays() {
@@ -66,14 +65,18 @@ class Workspace {
     }
 
     async workspaceHasEncryption() {
-        return (await this.storage.getItem("hash")) != undefined
+        try {
+            return (await this.storage.getItem("hash")) != undefined
+        } catch (e) {
+            return false
+        }
     }
 
     async loadWorkspaceFromBrowser(): Promise<void> {
-        const mom = await this.storage.getItem<string>(diaryIndexName)
+        const mom = await this.storage.getItem(diaryIndexName)
         if (!mom) return
 
-        const parsedMom: Mom = JSON.parse(mom)
+        const parsedMom: Mom = JSON.parse(mom.toString())
         if (!parsedMom) return
 
         this.mom = parsedMom
@@ -111,9 +114,9 @@ class Workspace {
         if (!(await this.workspaceHasEncryption())) return Error("Not encrypted")
 
         await this.updateDaysStorage()
-        const hash = await this.storage.getItem<string>("hash")
+        const hash = await this.storage.getItem("hash")
         if (hash) {
-            const compareResult = await bcrypt.compare(password, hash)
+            const compareResult = await bcrypt.compare(password, hash.toString())
             if (!compareResult) return Error("Hash comparison failed")
         }
 
@@ -180,7 +183,14 @@ class Workspace {
     }
 }
 
-export async function createWorkspace(storage: LocalForage): Promise<Workspace> {
+export interface WorkspaceStorage {
+    getItem(key: string): Promise<Buffer | undefined>
+    setItem(key: string, value: Buffer | string): Promise<void>
+    removeItem(key: string): Promise<void>
+    keys(): Promise<string[]>
+}
+
+export async function createWorkspace(storage: WorkspaceStorage): Promise<Workspace> {
     const workspace = new Workspace(storage)
     await workspace.loadWorkspaceFromBrowser()
     return workspace

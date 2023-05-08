@@ -1,9 +1,15 @@
 import { motion } from "framer-motion"
 
-export default function FadeIn({ children, key }: { key: string; children: React.PropsWithChildren<any> }) {
+export default function FadeIn({
+    children,
+    keyName,
+}: {
+    keyName: string
+    children: React.PropsWithChildren<any>
+}) {
     return (
         <motion.div
-            key={key}
+            key={keyName}
             initial={{
                 opacity: 0,
                 transform: "translateY(5%)",

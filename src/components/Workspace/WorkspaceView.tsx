@@ -19,7 +19,6 @@ export default function WorkspaceView({ workspaceApi }: Props) {
         const id = workspaceApi.newID(new Date(Date.now()))
         await workspaceApi.addNewDay({
             date: Date.now(),
-            description: e.target.value.slice(undefined, 20),
             identifier: id,
         })
         await workspaceApi.updateDayByID(id, Buffer.from(e.target.value))
@@ -36,7 +35,6 @@ export default function WorkspaceView({ workspaceApi }: Props) {
     }, [])
 
     const [showPasswordForm, setShowPasswordForm] = useState(false)
-
     async function lockout(password: string) {
         setPromptLoading(true)
         const r = await workspaceApi.encryptWorkspace(password)

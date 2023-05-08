@@ -26,7 +26,7 @@ export default function ({ workspace }: { workspace: Workspace }) {
             <div className="bottom">
                 <div className="items">
                     <AnimatePresence>
-                        {!days || (days.length == 0 && <p className="error">No recent days found</p>)}
+                        {(!days || days.length == 0) && <p className="error">No recent days found</p>}
                         {days?.map((d, id) => {
                             const date = new Date(d.date)
                             const format = workspace.formatDate(date)

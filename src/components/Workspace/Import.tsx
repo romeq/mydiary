@@ -4,14 +4,23 @@ import MultiDialog from "./ComponentList"
 import { motion } from "framer-motion"
 import ImportFromFileProvider from "./ImportFromFileProvider"
 import localforage from "localforage"
-import type { Mom } from "../../lib/workspace"
-import { diaryIndexName } from "./Workspace"
+import type { Mom, WorkspaceStorage } from "../../lib/workspace"
+import { diaryIndexName, s3credsIndex } from "./Workspace"
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
+import { FetchHttpHandler } from "@aws-sdk/fetch-http-handler"
+import { newS3Storage, S3Storage } from "../../lib/storages/s3"
 
-export default function Import({ onCreateNew: onfinish }: { onCreateNew: () => void }) {
+export interface SetStorageInstanceOptions {
+    instanceAddress: string
+    accessKey: string
+    secretKey: string
+}
+
+export default function Import({ onCreateNew: onfinish }: { onCreateNew: (s?: WorkspaceStorage) => void }) {
     const [index, setIndex] = useState(0)
     const [shown, setShown] = useState(true)
 
-    async function createNewWorkspace() {
+    async function createNewBrowserWorkspace() {
         if ((await localforage.getItem(diaryIndexName)) == undefined) {
             const mom: Mom = {
                 days: [],
@@ -20,6 +29,44 @@ export default function Import({ onCreateNew: onfinish }: { onCreateNew: () => v
         }
         setShown(false)
         setTimeout(() => onfinish(), 200)
+    }
+
+    async function newS3Instance(opts: SetStorageInstanceOptions): Promise<boolean> {
+        try {
+            const client = newS3Storage(opts)
+
+            const s3storageInstance = new S3Storage(client)
+            try {
+                const getObjectCommand = new GetObjectCommand({
+                    Bucket: s3storageInstance.bucketName,
+                    Key: diaryIndexName,
+                })
+                await client.send(getObjectCommand) // this will throw an error if the object doesn't exist, so that we can create it
+            } catch (e) {
+                const mom: Mom = {
+                    days: [],
+                }
+
+                const putObjectCommand = new PutObjectCommand({
+                    Bucket: s3storageInstance.bucketName,
+                    Key: diaryIndexName,
+                    Body: JSON.stringify(mom),
+                })
+                await client.send(putObjectCommand)
+            }
+
+            setShown(false)
+            setTimeout(() => onfinish(s3storageInstance), 200)
+        } catch (e) {
+            console.error(e)
+            return false
+        }
+
+        await localforage.setItem(s3credsIndex, JSON.stringify(opts))
+        setShown(false)
+        setTimeout(() => onfinish(), 200)
+
+        return true
     }
 
     function adjustIndex(x: number) {
@@ -62,14 +109,12 @@ export default function Import({ onCreateNew: onfinish }: { onCreateNew: () => v
                         </div>
 
                         <div className="buttons">
-                            <button onClick={createNewWorkspace}>Create new</button>
-                            <button disabled onClick={() => adjustIndex(1)}>
-                                Import existing
-                            </button>
+                            <button onClick={createNewBrowserWorkspace}>Use it offline</button>
+                            <button onClick={() => adjustIndex(1)}>Import existing</button>
                         </div>
                     </div>,
 
-                    <ImportFromFileProvider goback={() => adjustIndex(-1)} />,
+                    <ImportFromFileProvider setS3Instance={newS3Instance} goback={() => adjustIndex(-1)} />,
                 ]}
             />
         </motion.div>

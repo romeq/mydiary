@@ -1,13 +1,14 @@
 ---
-const f = !process.env.DEVENV
+const f = !(process.env.ENV === "prod")
 ---
 
 {
     f && (
         <div class="developmentNotice">
             <div class="content">
-                This project is under heavy development and most features are not available yet.
-                <a href="https://github.com/romeq/mydiary">Support development by giving a star!</a>
+                This project is under heavy development and some bugs may occur.
+                <a href="https://github.com/romeq/mydiary">Support development by giving a star!</a> or
+                <a href="https://github.com/romeq/mydiary/issues/new">create a bug report</a>
             </div>
         </div>
     )

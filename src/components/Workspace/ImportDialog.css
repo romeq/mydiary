@@ -62,8 +62,23 @@ p {
     transition: 100ms ease;
     background-color: transparent;
 } 
-.buttons input {
+
+.form {
+    margin: 20px 0;
+}
+.form .input-area {
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+label {
+    min-width: fit-content;
+    margin-right: 10px;
+}
+input[type="text"], input[type="password"] {
+    width: 75%;
+    margin: 5px 0;
     color: hsl(var(--accent), 12%, 10%);
     background-color: hsl(var(--accent), 12%, 90%);
 }
@@ -92,7 +107,6 @@ p {
     .buttons {
         flex-direction: column;
     }
-
     .container {
         flex-direction: column-reverse;
     }
