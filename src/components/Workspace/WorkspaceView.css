@@ -39,11 +39,10 @@ menu .sync-options {
     border: 1px solid hsl(var(--accent), 12%, 80%);
     color: white;
     width: 100%;
-    padding: 90px 10px;
     border-radius: 10px;
     position: absolute;
     top: 100%;
-    padding-top: 0;
+    padding: 0 10px;
 
     display: flex;
     flex-direction: column;
@@ -137,8 +136,18 @@ button:active {
     justify-content: space-between;
     align-items: center;
 }
+
+.write-main .connected {
+    padding: 2px;
+    color: hsl(110, 100%, 25%);
+}
+.write-main .saving {
+    padding: 2px;
+    color: hsl(110, 100%, 25%);
+}
 .write-main .error {
     padding: 20px;
+    margin-bottom: 10px;
     text-align: center;
     color: hsl(0, 100%, 30%);
     background-color: hsl(0, 50%, 90%);

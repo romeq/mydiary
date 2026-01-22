@@ -1,12 +1,13 @@
 ---
 import Layout from "../layouts/Layout.astro"
-import Workspace from "../components/Workspace/Workspace"
+import WorkspaceView from "../components/Workspace/Workspace"
 import Development from "../components/Landing/Development.astro"
 ---
 
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
+        <link rel="manifest" href="/firefox-manifest.json" />
         <meta name="viewport" content="width=device-width" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <title>mydiary - My Workspace</title>
@@ -15,7 +16,7 @@ import Development from "../components/Landing/Development.astro"
         <Layout title="My Workspace">
             <Development />
             <main>
-                <Workspace client:only />
+                <WorkspaceView client:only />
             </main>
         </Layout>
     </body>

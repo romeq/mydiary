@@ -6,9 +6,8 @@ import ImportFromFileProvider from "./ImportFromFileProvider"
 import localforage from "localforage"
 import type { Mom, WorkspaceStorage } from "../../lib/workspace"
 import { diaryIndexName, s3credsIndex } from "./Workspace"
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
-import { FetchHttpHandler } from "@aws-sdk/fetch-http-handler"
-import { newS3Storage, S3Storage } from "../../lib/storages/s3"
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3"
+import { newS3StorageClient, S3Storage } from "../../lib/storages/s3"
 
 export interface SetStorageInstanceOptions {
     instanceAddress: string
@@ -33,7 +32,7 @@ export default function Import({ onCreateNew: onfinish }: { onCreateNew: (s?: Wo
 
     async function newS3Instance(opts: SetStorageInstanceOptions): Promise<boolean> {
         try {
-            const client = newS3Storage(opts)
+            const client = newS3StorageClient(opts)
 
             const s3storageInstance = new S3Storage(client)
             try {

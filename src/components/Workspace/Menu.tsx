@@ -1,12 +1,14 @@
 import { AnimatePresence } from "framer-motion"
 import { useEffect, useMemo, useState } from "react"
-import { createWorkspace, Workspace, WorkspaceStorage } from "../../lib/workspace"
+import { createWorkspace, getCurrentDay, Mom, todaysStorageID, Workspace, WorkspaceStorage } from "../../lib/workspace"
 import { motion } from "framer-motion"
-import { newS3Storage, S3Storage } from "../../lib/storages/s3"
+import { newS3StorageClient, S3Storage } from "../../lib/storages/s3"
 import ImportFromFileProvider from "./ImportFromFileProvider"
 import type { SetStorageInstanceOptions } from "./Import"
-import localforage from "localforage"
 import { diaryIndexName, s3credsIndex } from "./Workspace"
+import localforage from "localforage"
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3"
+import { BrowserStorage } from "../../lib/storages/browser"
 
 const views = [
     {
@@ -44,6 +46,11 @@ export default function ({
     )
 
     async function syncWorkspaceToStorage(toStorage: WorkspaceStorage) {
+        /// 1 Store new store config  ok
+        /// 3 Create a handler for new storage
+        /// 4 Move data from old storage to new storage
+        console.log("workspace.storage")
+        console.log(workspace.storage instanceof S3Storage, workspace.storage instanceof BrowserStorage)
         const days = await workspace.getAllDays()
         const proms = days?.map(async (day) => {
             const dayDate = new Date(day.date)
@@ -54,10 +61,14 @@ export default function ({
             const toStorageWorkspace = await createWorkspace(toStorage)
             await toStorageWorkspace.updateDayByID(workspace.newID(dayDate), content)
             console.log({ content })
+            workspace.storage = toStorage
+            await workspace.loadFromStorage()
         })
         if (proms) await Promise.all(proms)
+
     }
 
+    // (action -> syncWorkSpacetoStorage)
     function SyncButton({ action }: { action: (toStorage: WorkspaceStorage) => Promise<any> }) {
         const [showPopup, setShowPopup] = useState(false)
         const [showS3Popup, setShowS3Popup] = useState(false)
@@ -65,9 +76,40 @@ export default function ({
 
         async function setS3Instance(props: SetStorageInstanceOptions) {
             setSyncing(true)
+            await new Promise((res) => setTimeout(res, 1000))
+
             try {
-                await action(new S3Storage(newS3Storage(props)))
-            } catch (e) {}
+                const client = newS3StorageClient(props)
+                const s3storageInstance = new S3Storage(client)
+                try {
+                    const getObjectCommand = new GetObjectCommand({
+                        Bucket: s3storageInstance.bucketName,
+                        Key: diaryIndexName,
+                    })
+                    await client.send(getObjectCommand) // this will throw an error if the object doesn't exist, so that we can create it
+                } catch (e) {
+                    const mom: Mom = {
+                        days: [],
+                    }
+
+                    const putObjectCommand = new PutObjectCommand({
+                        Bucket: s3storageInstance.bucketName,
+                        Key: diaryIndexName,
+                        Body: JSON.stringify(mom),
+                    })
+                    await client.send(putObjectCommand)
+                }
+
+                await localforage.setItem(s3credsIndex, JSON.stringify(props))
+
+                console.log(s3storageInstance)
+                await action(s3storageInstance)
+            } catch (e) {
+                console.error(e)
+                setSyncing(false)
+                return false
+            }
+
             setSyncing(false)
             setShowS3Popup(false)
             setShowPopup(false)
@@ -127,6 +169,16 @@ export default function ({
         )
     }
 
+
+    const isPresentedDayToday = useMemo(
+        () => getCurrentDay(workspace) == todaysStorageID(workspace),
+        [workspace]
+    )
+
+    function navigateToToday() {
+        window.location.replace("/workspace")
+    }
+
     return (
         <>
             <menu>
@@ -141,6 +193,7 @@ export default function ({
 
                 <div className="menu-links">
                     <h3>Links</h3>
+                    {isPresentedDayToday || <button onClick={navigateToToday}>Go to today</button>}
                     <AnimatePresence>
                         <ul>
                             {views.map((cview, i) => (

@@ -6,7 +6,8 @@ export default function ({ workspace }: { workspace: Workspace }) {
     const [days, setDays] = useState<DayRecord[]>()
 
     async function fetchDays() {
-        setDays(await workspace.getAllDays())
+        const days = await workspace.getAllDays()
+        setDays(days?.toReversed())
     }
 
     useEffect(() => {

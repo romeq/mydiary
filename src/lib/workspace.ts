@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs"
 import { diaryIndexName } from "../components/Workspace/Workspace"
 import { Buffer } from "buffer"
 import { decrypt, encrypt } from "./crypto"
+import { S3Storage } from "./storages/s3"
 
 // Implementation:
 // - Master: has information of the childs (address)
@@ -45,11 +46,13 @@ class Workspace {
     /*
         File-specific functions 
     */
-    async addNewDay(day: DayRecord) {
+    async addNewDay(day: DayRecord): Promise<boolean> {
         if (this.mom?.days.filter((e) => e.identifier === day.identifier).length === 0) {
             this.mom.days.push(day)
             await this.updateDaysStorage()
+            return true
         }
+        return false
     }
 
     async updateDayByID(id: string, story: Buffer) {
@@ -72,21 +75,30 @@ class Workspace {
         }
     }
 
+    /* 
+        loads the index of all days to memory
+    */
     async loadFromStorage(): Promise<void> {
+        console.log("loadFromStorage(): running")
         const mom = await this.storage.getItem(diaryIndexName)
-        if (!mom) return
+        if (!mom) {
+            console.log(`loadFromStorage(): didn't find ${diaryIndexName}`)
+            return
+        }
 
         const parsedMom: Mom = JSON.parse(mom.toString())
         if (!parsedMom) return
+        console.log(`loadFromStorage(): got ${parsedMom.days.length} days`)
 
         this.mom = parsedMom
     }
 
     /*
-        encryptWorkspace encrypts all days from the browser storage and replaces their contents.
+        encryptWorkspace encrypts all days from the storage and replaces their contents.
         the key is derived using pbkdf2.
     */
     async encryptWorkspace(password: string): Promise<Error | undefined> {
+        console.log(this.storage instanceof S3Storage ? "this.storage is an instance of S3Storage, continunig..." : "Encrypting browser storage, continuing...")
         if (await this.workspaceHasEncryption()) return Error("Already encrypted")
 
         await this.updateDaysStorage()
@@ -106,11 +118,12 @@ class Workspace {
     }
 
     /* 
-        decryptWorkspace decrypts the workspace from browser storage.
+        decryptWorkspace decrypts the workspace from storage.
         the key is derived from password-parameter with pbkdf2 and first compared with
         the bcrypt-hash saved among the files in browser.
     */
     async decryptWorkspace(password: string): Promise<Error | undefined> {
+        console.log("decryptWorkspace(): log: running")
         if (!(await this.workspaceHasEncryption())) return Error("Not encrypted")
 
         await this.updateDaysStorage()
@@ -121,10 +134,12 @@ class Workspace {
         }
 
         const days = await this.getStorageIDs()
+        console.log("decryptWorkspace(): debug: days", days)
         try {
             const proms = days.map(async (day) => await this.decryptDay(day, password))
             await Promise.all(proms)
         } catch (e) {
+            console.error(e)
             return Error("Failed to decrypt files")
         }
 
@@ -158,8 +173,13 @@ class Workspace {
         const content = await this.getDayByID(day)
         if (!content) throw Error("Day not found")
 
+        console.debug("decryptDay(): content:",  new TextDecoder().decode(content))
         const decrypted = await decrypt(content, password)
-        if (decrypted instanceof Error) throw Error("Decryption failed")
+        if (decrypted instanceof Error) {
+            console.error("decryptDay():", "msg:"+decrypted.message, "stack:"+decrypted.stack, "cause:"+decrypted.cause, "name:"+decrypted.name)
+            throw Error("Decryption failed")
+        }
+        console.debug("decryptDay(): content (decrypted):",  new TextDecoder().decode(decrypted), password)
         await this.updateDayByID(day, decrypted)
     }
 
@@ -183,6 +203,8 @@ class Workspace {
     }
 }
 
+export { Workspace }
+
 export interface WorkspaceStorage {
     getItem(key: string): Promise<Buffer | undefined>
     setItem(key: string, value: Buffer | string): Promise<void>
@@ -196,4 +218,14 @@ export async function createWorkspace(storage: WorkspaceStorage): Promise<Worksp
     return workspace
 }
 
-export { Workspace }
+export function getCurrentDay(workspaceApi: Workspace) {
+    return window.location.search
+                .split("&")
+                .find((v) => v.includes("d="))
+                ?.replace("d=", "")
+                .replace("?", "") || workspaceApi.newID(new Date(Date.now()))
+}
+
+export function todaysStorageID(workspaceApi: Workspace): String {
+    return workspaceApi.newID(new Date(Date.now()))
+}

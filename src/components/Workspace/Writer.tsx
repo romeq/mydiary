@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react"
+import { ChangeEvent, useEffect, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import type { Workspace } from "../../lib/workspace"
 import Menu from "./Menu"
@@ -10,10 +10,12 @@ import WriterInterfaceView from "./Views/WriterInterfaceView"
 
 export default function ({
     setShowPasswordForm,
+    shouldFetchWriterView,
     save,
     workspaceApi,
 }: {
     setShowPasswordForm: (v: boolean) => void
+    shouldFetchWriterView: [boolean, React.Dispatch<React.SetStateAction<boolean>>]
     workspaceApi: Workspace
     save(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): Promise<void>
 }) {
@@ -39,7 +41,7 @@ export default function ({
                 <ComponentList
                     index={view}
                     components={[
-                        <WriterInterfaceView save={save} workspaceApi={workspaceApi} />,
+                        <WriterInterfaceView shouldFetchWriterView={true} save={save} workspaceApi={workspaceApi} />,
                         <FadeIn keyName="previous-writings">
                             <PreviousWritings workspace={workspaceApi} />
                         </FadeIn>,

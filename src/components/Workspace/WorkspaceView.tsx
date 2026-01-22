@@ -1,7 +1,7 @@
 import "./WorkspaceView.css"
 import { AnimatePresence } from "framer-motion"
-import { ChangeEvent, useEffect, useState } from "react"
-import type { Workspace } from "../../lib/workspace"
+import { ChangeEvent, useEffect, useMemo, useState } from "react"
+import { Workspace, getCurrentDay } from "../../lib/workspace"
 import PasswordPromptComponent from "../../hooks/PasswordPrompt/Prompt"
 import Writer from "./Writer"
 import Notice from "./Notice"
@@ -16,12 +16,14 @@ export default function WorkspaceView({ workspaceApi }: Props) {
     const [recentlyEncrypted, setRecentlyEncrypted] = useState<boolean>(false)
 
     async function save(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-        const id = workspaceApi.newID(new Date(Date.now()))
-        await workspaceApi.addNewDay({
+        const day = getCurrentDay(workspaceApi)
+
+        console.log(await workspaceApi.addNewDay({
             date: Date.now(),
-            identifier: id,
-        })
-        await workspaceApi.updateDayByID(id, Buffer.from(e.target.value))
+            identifier: day,
+        }) ? "Created a new day while saving, now updating" : "Day already found, updating")
+
+        await workspaceApi.updateDayByID(day, Buffer.from(e.target.value))
     }
 
     const [isencrypted, setIsencrypted] = useState(false)
@@ -47,6 +49,11 @@ export default function WorkspaceView({ workspaceApi }: Props) {
         setRecentlyEncrypted(true)
     }
 
+    const shouldFetchWritingInterface = useState(false)
+    function fetchWritingInterface() {
+        shouldFetchWritingInterface[1](true)
+    }
+
     return (
         <AnimatePresence>
             {isencrypted ? (
@@ -67,6 +74,7 @@ export default function WorkspaceView({ workspaceApi }: Props) {
                             setIsencrypted(false)
                         }
                         setPromptLoading(false)
+                        fetchWritingInterface()
 
                         return success
                     }}
@@ -74,7 +82,7 @@ export default function WorkspaceView({ workspaceApi }: Props) {
             ) : showPasswordForm ? (
                 <PasswordPromptComponent
                     buttonText="Encrypt vault"
-                    title="Close vault"
+                    title="Close workspace"
                     desc="You can encrypt your workspace with wanted password. However, if you manage to lose the password, it is not recoverable."
                     okcallback={async (password) => {
                         lockout(password)
@@ -93,7 +101,12 @@ export default function WorkspaceView({ workspaceApi }: Props) {
                     visible
                 />
             ) : (
-                <Writer save={save} setShowPasswordForm={setShowPasswordForm} workspaceApi={workspaceApi} />
+                <Writer 
+                    shouldFetchWriterView={shouldFetchWritingInterface} 
+                    save={save}
+                    setShowPasswordForm={setShowPasswordForm}
+                    workspaceApi={workspaceApi} 
+                />
             )}
         </AnimatePresence>
     )

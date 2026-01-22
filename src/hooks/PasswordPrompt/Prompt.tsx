@@ -1,6 +1,6 @@
 import "./Prompt.css"
 import { motion } from "framer-motion"
-import { createRef, FormEvent, useEffect, useState } from "react"
+import { createRef, FormEvent, KeyboardEvent, KeyboardEventHandler, useEffect, useState } from "react"
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa"
 
 export interface Props {
@@ -21,12 +21,18 @@ export default function PasswordPromptComponent({
     inProgress,
     desc,
     buttonText,
+    setOpen,
     okcallback,
 }: Props) {
     const passwordInput = createRef<HTMLInputElement>()
     const [passwordShown, setPasswordShown] = useState(false)
     const [errorInCallback, setErrorInFinish] = useState<Error>()
     const [formIsBusy, setFormIsBusy] = useState(false)
+
+    async function closeWithoutSaving(e: React.MouseEvent<HTMLButtonElement> | undefined) {
+        if (e) e.preventDefault()
+        if (setOpen) setOpen(false)
+    }
 
     async function close(e: FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -67,6 +73,9 @@ export default function PasswordPromptComponent({
             }}
         >
             <div className="box">
+                <button className="back" onClick={closeWithoutSaving}>
+                    Go back
+                </button>
                 <div className="container">
                     <div className="text-section">
                         <h2>{title}</h2>
@@ -77,7 +86,7 @@ export default function PasswordPromptComponent({
                 </div>
 
                 <div className="buttons">
-                    <form onSubmit={close}>
+                    <form onSubmit={close} onAbort={() => closeWithoutSaving(undefined)}>
                         <div className="input-inline">
                             <input
                                 autoFocus={true}

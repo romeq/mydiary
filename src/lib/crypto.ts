@@ -7,27 +7,36 @@ async function encrypt(content: Buffer, key: string): Promise<Buffer | Error> {
     const encrypted = await window.crypto.subtle.encrypt(
         {
             name: "AES-CBC",
-            iv: Buffer.alloc(16, 0x00),
+            iv: new ArrayBuffer(16),
         },
         derivedkey,
-        pad(content)
+        new Uint8Array(pad(content)).buffer
     )
+
+    const rwaDig = await window.crypto.subtle.digest("SHA-256", new Uint8Array(encrypted).buffer)
+    console.log(new Uint8Array(rwaDig).toHex())
 
     return Buffer.from(encrypted)
 }
 
 async function decrypt(content: Buffer, key: string): Promise<Buffer | Error> {
+    const derivedkey = await deriveKey(key)
     try {
+        const rwaDig = await window.crypto.subtle.digest("SHA-256", new Uint8Array(content).buffer)
+        console.log(new Uint8Array(rwaDig).toHex())
+
         const decrypted = await window.crypto.subtle.decrypt(
             {
                 name: "AES-CBC",
-                iv: Buffer.alloc(16, 0x00),
+                iv: new ArrayBuffer(16),
             },
-            await deriveKey(key),
-            content
+            derivedkey,
+            new Uint8Array(content).buffer
         )
+        console.log("window.crypto.subtle.decrypt ok")
 
         const decryptedBuffer = new TextDecoder().decode(decrypted)
+        console.log("decode ok, unpadding")
         return Buffer.from(unpad(decryptedBuffer))
     } catch (e: any) {
         console.error("Decryption failed: got", Error(e))
@@ -49,7 +58,7 @@ async function deriveKey(password: string) {
             name: "PBKDF2",
             iterations: 100000,
             hash: "SHA-256",
-            salt: Buffer.alloc(16, 0x00),
+            salt: new ArrayBuffer(16),
         },
         importedKey,
         { name: "AES-CBC", length: 256 },

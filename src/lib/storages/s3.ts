@@ -11,7 +11,7 @@ import { FetchHttpHandler } from "@aws-sdk/fetch-http-handler"
 
 export class S3Storage {
     client: S3Client
-    bucketName: string = "diary"
+    bucketName: string = "mydiary"
 
     constructor(client: S3Client) {
         this.client = client
@@ -49,7 +49,7 @@ export class S3Storage {
     }
 }
 
-export function newS3Storage(s3Creds: SetStorageInstanceOptions): S3Client {
+export function newS3StorageClient(s3Creds: SetStorageInstanceOptions): S3Client {
     return new S3Client({
         region: "us-east-1",
         endpoint: s3Creds.instanceAddress,

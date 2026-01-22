@@ -17,6 +17,10 @@
     border-radius: 10px;
 }
 
+.box .back {
+    float: right;
+}
+
 @media screen and (max-width: 600px) {
     .box {
         width: 100%;

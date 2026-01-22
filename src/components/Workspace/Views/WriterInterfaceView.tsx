@@ -1,18 +1,23 @@
 import { ChangeEvent, createRef, useEffect, useState } from "react"
 import type { Workspace } from "../../../lib/workspace"
 import FadeIn from "../../FadeIn"
+import { S3Storage } from "../../../lib/storages/s3"
+import { FaSpinner } from "react-icons/fa"
 
 export default function ({
     save,
+    shouldFetchWriterView,
     workspaceApi,
 }: {
     save: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => Promise<void>
+    shouldFetchWriterView: [boolean, React.Dispatch<React.SetStateAction<boolean>>]
     workspaceApi: Workspace
 }) {
     const [saving, setSaving] = useState({ status: false, error: false })
 
     const textareaRef = createRef<HTMLTextAreaElement>()
     async function importFromStorage(ID: string) {
+        console.warn(`Loading from storage with ID: ${ID}`)
         if (!textareaRef.current) return
 
         try {
@@ -31,9 +36,10 @@ export default function ({
                 ?.replace("d=", "")
                 .replace("?", "") || workspaceApi.newID(new Date(Date.now()))
 
-        console.warn(`Loading from storage with ID: ${day}`)
         importFromStorage(day)
-    }, [])
+    }, [shouldFetchWriterView[0]])
+
+
     return (
         <FadeIn keyName="write-about-this-day">
             <div className="write-main">
@@ -46,17 +52,13 @@ export default function ({
                     <img src="/assets/blooming.svg"></img>
                 </div>
                 <div className="bottom">
-                    {saving.status ? <p className="saving">Saving...</p> : <p className="saving">Saved!</p>}
-                    {saving.error ? (
-                        <p className="saving">There was an error while saving your diary.</p>
-                    ) : (
-                        <></>
-                    )}
+                    <StorageConnectedString saving={saving.status} error={saving.error} />
                     <textarea
                         autoFocus={true}
                         ref={textareaRef}
+                        disabled={saving.error}
                         onChange={async (e) => {
-                            setSaving({ status: true, error: false })
+                            setSaving({ status: true, error: saving.error })
 
                             try {
                                 await save(e)
@@ -72,4 +74,14 @@ export default function ({
             </div>
         </FadeIn>
     )
+
+    function StorageConnectedString({ saving, error }: { saving: boolean, error: boolean }) {
+        return (
+            workspaceApi.storage instanceof S3Storage
+                ? (error 
+                    ? <p className="error">Storage connection failed. For now, anything can't be written until the connection is fixed.</p> 
+                    : <p className="connected">Connected to S3 {saving && <FaSpinner className="spinning" />}</p>)
+                : <p className="connected">Saved!</p>
+        )
+    }
 }

@@ -1,5 +1,6 @@
 import { useState } from "react"
 import type { SetStorageInstanceOptions } from "./Import"
+import { FaSpinner } from "react-icons/fa"
 
 export default function ({
     loading,
@@ -59,7 +60,6 @@ export default function ({
                     <div className="input-area">
                         <label>Access key</label>
                         <input
-                            required
                             type="text"
                             name="access-key"
                             placeholder="SomeAccessKey"
@@ -69,7 +69,6 @@ export default function ({
                     <div className="input-area">
                         <label>Secret key</label>
                         <input
-                            required
                             type="password"
                             name="secret-key"
                             placeholder="************"
@@ -80,7 +79,7 @@ export default function ({
 
                 <div className="buttons">
                     <button type="submit" disabled={loading}>
-                        Setup S3 sync
+                        Setup S3 sync {loading && <FaSpinner className="spinning" />}
                     </button>
                     <button type="button" disabled={loading} onClick={goback}>
                         Go back
